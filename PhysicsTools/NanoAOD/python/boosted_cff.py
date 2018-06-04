@@ -12,6 +12,8 @@ from Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff import 
 from Configuration.Geometry.GeometryRecoDB_cff import *
 from RecoBTag.Combined.pfDeepCSVJetTags_cfi import pfDeepCSVJetTags
 from RecoBTag.SecondaryVertex.combinedSecondaryVertexCommon_cff import combinedSecondaryVertexCommon
+from  PhysicsTools.PatAlgos.recoLayer0.jetCorrFactors_cfi import *
+
 
 
 
@@ -123,11 +125,20 @@ looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags = pfDeepCSVJetTags.clon
     src = cms.InputTag('looseOptRHTTpfDeepCSVInfos')
 )
 
+
+jetCorrFactorsHTT = patJetCorrFactors.clone(src=cms.InputTag("looseOptRHTT", "SubJets"),
+    levels = cms.vstring('L1FastJet',
+        'L2Relative',
+        'L3Absolute',
+    'L2L3Residual'),
+    primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+)
+
 looseOptRHTTpatSubJets = cms.EDProducer("PATJetProducer",
     jetSource = cms.InputTag("looseOptRHTT", "SubJets"),
     embedPFCandidates = cms.bool(False),
-    addJetCorrFactors    = cms.bool(False),
-    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactors") ),
+    addJetCorrFactors    = cms.bool(True),
+    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("jetCorrFactorsHTT") ),
     # btag information
     addBTagInfo          = cms.bool(True),   ## master switch
     addDiscriminators    = cms.bool(True),   ## addition btag discriminators
@@ -435,11 +446,20 @@ ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags = pfDeepCSVJet
     src = cms.InputTag('ca15PFSoftdropJetsCHSpfDeepCSVInfos')
 )
 
+
+jetCorrFactorsSD = patJetCorrFactors.clone(src=cms.InputTag("ca15PFSoftdropJetsCHS", "SubJets"),
+    levels = cms.vstring('L1FastJet',
+        'L2Relative',
+        'L3Absolute',
+    'L2L3Residual'),
+    primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+)
+
 ca15PFSoftdropJetsCHSpatSubJets = cms.EDProducer("PATJetProducer",
     jetSource = cms.InputTag("ca15PFSoftdropJetsCHS", "SubJets"),
     embedPFCandidates = cms.bool(False),
-    addJetCorrFactors    = cms.bool(False),
-    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactors") ),
+    addJetCorrFactors    = cms.bool(True),
+    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("jetCorrFactorsSD") ),
     # btag information
     addBTagInfo          = cms.bool(True),   ## master switch
     addDiscriminators    = cms.bool(True),   ## addition btag discriminators
@@ -708,11 +728,21 @@ ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags = pfDeepCSVJe
     src = cms.InputTag('ca15PFSoftdrop2JetsCHSpfDeepCSVInfos')
 )
 
+
+jetCorrFactorsSD2 = patJetCorrFactors.clone(src=cms.InputTag("ca15PFSoftdrop2JetsCHS", "SubJets"),
+    levels = cms.vstring('L1FastJet',
+        'L2Relative',
+        'L3Absolute',
+    'L2L3Residual'),
+    primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+)
+
+
 ca15PFSoftdrop2JetsCHSpatSubJets = cms.EDProducer("PATJetProducer",
     jetSource = cms.InputTag("ca15PFSoftdrop2JetsCHS", "SubJets"),
     embedPFCandidates = cms.bool(False),
-    addJetCorrFactors    = cms.bool(False),
-    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactors") ),
+    addJetCorrFactors    = cms.bool(True),
+    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("jetCorrFactorsSD2") ),
     # btag information
     addBTagInfo          = cms.bool(True),   ## master switch
     addDiscriminators    = cms.bool(True),   ## addition btag discriminators
@@ -935,7 +965,7 @@ boostedSequence = cms.Sequence(
     #HTTV2 + subjet btags
     looseOptRHTT+looseOptRHTTImpactParameterTagInfos+looseOptRHTTpfInclusiveSecondaryVertexFinderTagInfos+ \
     looseOptRHTTpfDeepCSVInfos +\
-    looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags+looseOptRHTTpatSubJets+looseOptRHTTSubjetsOrdered+ \
+    looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags+jetCorrFactorsHTT+looseOptRHTTpatSubJets+looseOptRHTTSubjetsOrdered+ \
     #CA15 double btag
     ca15PFJetsCHSImpactParameterTagInfos+ca15PFJetsCHSpfInclusiveSecondaryVertexFinderTagInfos+ \
     ca15PFJetsCHSpfBoostedDoubleSVTagInfos+ca15PFJetsCHSpfBoostedDoubleSecondaryVertexBJetTags+ \
@@ -943,7 +973,7 @@ boostedSequence = cms.Sequence(
     #Softdrop CA15 jets + subjet btags
     ca15PFSoftdropJetsCHS+ca15PFSoftdropJetsCHSImpactParameterTagInfos+ ca15PFSoftdropJetsCHSpfInclusiveSecondaryVertexFinderTagInfos+ \
     ca15PFSoftdropJetsCHSpfDeepCSVInfos+ \
-    ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags+ \
+    ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags+jetCorrFactorsSD+\
     ca15PFSoftdropJetsCHSpatSubJets+ca15PFSoftdropJetsCHSSubjetsOrdered + \
     #Softdrop bbtag + nsubjettiness
     ca15PFSoftdropJetsCHSNoSub+ca15PFSDJetsCHSImpactParameterTagInfos+ca15PFSDJetsCHSpfInclusiveSecondaryVertexFinderTagInfos+ \
@@ -952,7 +982,7 @@ boostedSequence = cms.Sequence(
     #Softdrop beta = 1, zcut = 0.2
     ca15PFSoftdrop2JetsCHS+ca15PFSoftdrop2JetsCHSImpactParameterTagInfos+ ca15PFSoftdrop2JetsCHSpfInclusiveSecondaryVertexFinderTagInfos+ \
     ca15PFSoftdrop2JetsCHSpfDeepCSVInfos+ \
-    ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags+ \
+    ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags+ jetCorrFactorsSD2+\
     ca15PFSoftdrop2JetsCHSpatSubJets+ca15PFSoftdrop2JetsCHSSubjetsOrdered + \
     #Softdrop bbtag + nsubjettiness
     ca15PFSoftdrop2JetsCHSNoSub+ca15PFSD2JetsCHSImpactParameterTagInfos+ca15PFSD2JetsCHSpfInclusiveSecondaryVertexFinderTagInfos+ \
