@@ -16,6 +16,7 @@ from  PhysicsTools.PatAlgos.recoLayer0.jetCorrFactors_cfi import *
 
 
 
+
 ##################### User floats producers, selectors ##########################
 
 #Default parameters for HTTV2 and CA15 Fatjets
@@ -123,6 +124,7 @@ looseOptRHTTpfDeepCSVInfos = pfDeepCSVTagInfos.clone(
 looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags = pfDeepCSVJetTags.clone(
     src = cms.InputTag('looseOptRHTTpfDeepCSVInfos')
 )
+
 
 jetCorrFactorsHTT = patJetCorrFactors.clone(src=cms.InputTag("looseOptRHTT", "SubJets"),
     levels = cms.vstring('L1FastJet',
@@ -444,6 +446,7 @@ ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags = pfDeepCSVJet
     src = cms.InputTag('ca15PFSoftdropJetsCHSpfDeepCSVInfos')
 )
 
+
 jetCorrFactorsSD = patJetCorrFactors.clone(src=cms.InputTag("ca15PFSoftdropJetsCHS", "SubJets"),
     levels = cms.vstring('L1FastJet',
         'L2Relative',
@@ -725,6 +728,7 @@ ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags = pfDeepCSVJe
     src = cms.InputTag('ca15PFSoftdrop2JetsCHSpfDeepCSVInfos')
 )
 
+
 jetCorrFactorsSD2 = patJetCorrFactors.clone(src=cms.InputTag("ca15PFSoftdrop2JetsCHS", "SubJets"),
     levels = cms.vstring('L1FastJet',
         'L2Relative',
@@ -962,7 +966,6 @@ boostedSequence = cms.Sequence(
     looseOptRHTT+looseOptRHTTImpactParameterTagInfos+looseOptRHTTpfInclusiveSecondaryVertexFinderTagInfos+ \
     looseOptRHTTpfDeepCSVInfos +\
     looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags+jetCorrFactorsHTT+looseOptRHTTpatSubJets+looseOptRHTTSubjetsOrdered+ \
-    
     #CA15 double btag
     ca15PFJetsCHSImpactParameterTagInfos+ca15PFJetsCHSpfInclusiveSecondaryVertexFinderTagInfos+ \
     ca15PFJetsCHSpfBoostedDoubleSVTagInfos+ca15PFJetsCHSpfBoostedDoubleSecondaryVertexBJetTags+ \
