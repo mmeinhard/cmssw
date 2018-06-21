@@ -218,7 +218,7 @@ HTTV2SubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     singleton = cms.bool(False),
     extension = cms.bool(False), 
     variables = cms.PSet(P4Vars,
-        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.99 || neutralEmEnergyFraction() >= 0.99 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0 || chargedEmEnergyFraction() >= 0.99?0:1",float, doc="Subjet ID passed?",precision=1),
+        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
         btag  = Var("bDiscriminator('looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CSV V2 btag discriminator",precision=10),
         area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
     )
@@ -670,7 +670,7 @@ ca15SoftDropSubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
         area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
         btag  = Var("bDiscriminator('ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CMVA V2 btag discriminator",precision=10),
-        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.99 || neutralEmEnergyFraction() >= 0.99 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0 || chargedEmEnergyFraction() >= 0.99?0:1",float, doc="Subjet ID passed?",precision=1),
+        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
     )
 )
 
@@ -951,7 +951,7 @@ ca15SoftDrop2SubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
         area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
         btag  = Var("bDiscriminator('ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CMVA V2 btag discriminator",precision=10),
-        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.99 || neutralEmEnergyFraction() >= 0.99 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0 || chargedEmEnergyFraction() >= 0.99?0:1",float, doc="Subjet ID passed?",precision=1),
+        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
     )
 )
 
