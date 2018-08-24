@@ -171,7 +171,7 @@ class NTupleCollection:
         self.sortAscendingBy  = sortAscendingBy
         self.sortDescendingBy = sortDescendingBy
     def makeBranchesScalar(self,treeNumpy,isMC):
-        if not isMC and self.objectType.mcOnly: return
+        if not isMC and self.mcOnly: return
         treeNumpy.var("n"+self.name, int)
         allvars = self.objectType.allVars(isMC)
         for v in allvars:
@@ -180,7 +180,7 @@ class NTupleCollection:
                 if self.help: h = "%s for %s [%d]" % ( h if h else v.name, self.help, i-1 )
                 treeNumpy.var("%s%d_%s" % (self.name, i, v.name), type=v.type, default=v.default, title=h, filler=v.filler)
     def makeBranchesVector(self,treeNumpy,isMC):
-        if not isMC and self.objectType.mcOnly: return
+        if not isMC and self.mcOnly: return
         treeNumpy.var("n"+self.name, int)
         allvars = self.objectType.allVars(isMC)
         for v in allvars:
@@ -189,7 +189,7 @@ class NTupleCollection:
             name="%s_%s" % (self.name, v.name) if v.name != "" else self.name
             treeNumpy.vector(name, "n"+self.name, self.maxlen, type=v.type, default=v.default, title=h, filler=v.filler)
     def fillBranchesScalar(self,treeNumpy,collection,isMC):
-        if not isMC and self.objectType.mcOnly: return
+        if not isMC and self.mcOnly: return
         if self.filter != None: collection = [ o for o in collection if self.filter(o) ]
         if self.sortAscendingBy != None: collection  = sorted(collection, key=self.sortAscendingBy)
         if self.sortDescendingBy != None: collection = sorted(collection, key=self.sortDescendingBy, reverse=True)
@@ -201,7 +201,7 @@ class NTupleCollection:
             for v in allvars:
                 treeNumpy.fill("%s%d_%s" % (self.name, i+1, v.name), v(o))
     def fillBranchesVector(self,treeNumpy,collection,isMC):
-        if not isMC and self.objectType.mcOnly: return
+        if not isMC and self.mcOnly: return
         if self.filter != None: collection = [ o for o in collection if self.filter(o) ]
         if self.sortAscendingBy != None: collection  = sorted(collection, key=self.sortAscendingBy)
         if self.sortDescendingBy != None: collection = sorted(collection, key=self.sortDescendingBy, reverse=True)
