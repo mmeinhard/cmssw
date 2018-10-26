@@ -12,7 +12,10 @@ from Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff import 
 from Configuration.Geometry.GeometryRecoDB_cff import *
 from RecoBTag.Combined.pfDeepCSVJetTags_cfi import pfDeepCSVJetTags
 from RecoBTag.SecondaryVertex.combinedSecondaryVertexCommon_cff import combinedSecondaryVertexCommon
-from  PhysicsTools.PatAlgos.recoLayer0.jetCorrFactors_cfi import *
+from PhysicsTools.PatAlgos.recoLayer0.jetCorrFactors_cfi import *
+from RecoJets.JetProducers.GenJetParameters_cfi import *
+
+
 
 
 
@@ -183,7 +186,7 @@ HTTV2Table = cms.EDProducer("SimpleCandidateFlatTableProducer",
     singleton = cms.bool(False), # the number of entries is variable
     extension = cms.bool(False), 
     variables = cms.PSet(P4Vars,
-        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
+        #area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
         subJetIdx1 = Var("?numberOfSourceCandidatePtrs()>0 && sourceCandidatePtr(0).numberOfSourceCandidatePtrs()>0?sourceCandidatePtr(0).key():-1", int,
              doc="index of first subjet"),
         subJetIdx2 = Var("?numberOfSourceCandidatePtrs()>1 && sourceCandidatePtr(1).numberOfSourceCandidatePtrs()>0?sourceCandidatePtr(1).key():-1", int,
@@ -218,9 +221,10 @@ HTTV2SubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     singleton = cms.bool(False),
     extension = cms.bool(False), 
     variables = cms.PSet(P4Vars,
+        rawFactor = Var("1.-jecFactor('Uncorrected')",float,doc="1 - Factor to get back to raw pT",precision=6),
         IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
-        btag  = Var("bDiscriminator('looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CSV V2 btag discriminator",precision=10),
-        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
+        btagDeepB = Var("bDiscriminator('looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CSV V2 btag discriminator",precision=10),
+        #area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
     )
 )
 
@@ -667,6 +671,7 @@ ca15SoftDropSubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     singleton = cms.bool(False), # the number of entries is variable
     extension = cms.bool(False), 
     variables = cms.PSet(P4Vars, 
+        rawFactor = Var("1.-jecFactor('Uncorrected')",float,doc="1 - Factor to get back to raw pT",precision=6),
         #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
         area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
         btag  = Var("bDiscriminator('ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CMVA V2 btag discriminator",precision=10),
@@ -948,10 +953,123 @@ ca15SoftDrop2SubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     singleton = cms.bool(False), # the number of entries is variable
     extension = cms.bool(False), 
     variables = cms.PSet(P4Vars, 
+        rawFactor = Var("1.-jecFactor('Uncorrected')",float,doc="1 - Factor to get back to raw pT",precision=6),
         #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
         area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
         btag  = Var("bDiscriminator('ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CMVA V2 btag discriminator",precision=10),
         IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
+    )
+)
+
+#---- Gen HTT - Needed for JEC calculation
+
+from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
+selectedHadronsAndPartons = selectedHadronsAndPartons.clone(
+    particles = "prunedGenParticles"
+)
+
+jetFlavourInfosHTTV2PFJets = cms.EDProducer("JetFlavourClustering",
+    jets                     = cms.InputTag("looseOptRHTT"),
+    groomedJets              = cms.InputTag("looseOptRHTT"),
+    subjets                  = cms.InputTag("looseOptRHTT", "SubJets"),
+    bHadrons                 = cms.InputTag("selectedHadronsAndPartons","bHadrons"),
+    cHadrons                 = cms.InputTag("selectedHadronsAndPartons","cHadrons"),
+    partons                  = cms.InputTag("selectedHadronsAndPartons","algorithmicPartons"),
+    leptons                  = cms.InputTag("selectedHadronsAndPartons","leptons"),
+    jetAlgorithm             = cms.string("CambridgeAachen"),
+    rParam                   = cms.double(1.5),
+    ghostRescaling           = cms.double(1e-18),
+    hadronFlavourHasPriority = cms.bool(False)
+)
+
+HTTSubjetFlavourTable = cms.EDProducer("HTTSubjetFlavourTableProducer",
+    name = HTTV2SubjetsTable.name,
+    src = HTTV2SubjetsTable.src,
+    cut = HTTV2SubjetsTable.cut,
+    deltaR = cms.double(0.05),
+    subjetFlavourInfos = cms.InputTag("jetFlavourInfosHTTV2PFJets","SubJets"),
+)
+
+
+#HTTMCTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+#    src = cms.InputTag("looseOptRHTTSubjetsOrdered"),
+#    cut = cms.string(""), #probably already applied in miniaod
+#    name = cms.string("HTTV2Subjets"),
+#    singleton = cms.bool(False), # the number of entries is variable
+#    extension = cms.bool(True), # this is the main table for the jets
+#    variables = cms.PSet(
+#        partonFlavour = Var("partonFlavour()", int, doc="flavour from parton matching"),
+#        hadronFlavour = Var("hadronFlavour()", int, doc="flavour from hadron ghost clustering"),
+#        genJetIdx = Var("?genJetFwdRef().backRef().isNonnull()?genJetFwdRef().backRef().key():-1", int, doc="index of matched gen jet"),
+#    )
+#) 
+
+genJetParticleCollection = "packedGenParticles"
+
+# determine particles for clustering custom genJets
+from RecoJets.Configuration.GenJetParticles_cff import genParticlesForJetsNoNu
+genParticlesforHTT = genParticlesForJetsNoNu.clone(
+    src = cms.InputTag(genJetParticleCollection)
+)
+
+genHTT = cms.EDProducer(
+            "HTTTopJetProducer",
+            GenJetParameters.clone(
+                src = cms.InputTag("genParticlesforHTT"),
+                doAreaFastjet = cms.bool(False),
+                doRhoFastjet = cms.bool(False)
+                ),
+            #GenJetParameters.clone(
+            #    src               = cms.InputTag("genParticlesForJets"),
+            #    doAreaFastjet     = cms.bool(False),
+            #    doRhoFastjet      = cms.bool(False),
+            #    jetPtMin          = cms.double(200.0)
+            #    ),
+            AnomalousCellParameters,
+            useExplicitGhosts = cms.bool(True),
+            algorithm           = cms.int32(1),
+            jetAlgorithm        = cms.string("CambridgeAachen"),
+            rParam              = cms.double(1.5),
+            optimalR            = cms.bool(True),
+            qJets               = cms.bool(False),
+            minFatjetPt         = cms.double(200.),
+            minSubjetPt         = cms.double(0.),
+            minCandPt           = cms.double(0.),
+            maxFatjetAbsEta     = cms.double(99.),
+            subjetMass          = cms.double(30.),
+            muCut               = cms.double(0.8),
+            filtR               = cms.double(0.3),
+            filtN               = cms.int32(5),
+            mode                = cms.int32(4),
+            minCandMass         = cms.double(0.),
+            maxCandMass         = cms.double(999999.),
+            massRatioWidth      = cms.double(999999.),
+            minM23Cut           = cms.double(0.),
+            minM13Cut           = cms.double(0.),
+            maxM13Cut           = cms.double(999999.),
+            writeCompound       = cms.bool(True),
+            jetCollInstanceName = cms.string("SubJets")
+            )
+
+genHTTV2Table = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    src = cms.InputTag("genHTT"),
+    cut = cms.string(""), #we should not filter on cross linked collections
+    name = cms.string("genHTTV2"),
+    doc  = cms.string("gen HTTV2 candidates"),
+    singleton = cms.bool(False), # the number of entries is variable
+    extension = cms.bool(False), 
+    variables = cms.PSet(P4Vars  
+    )
+)
+
+genHTTV2SubjetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    src = cms.InputTag("genHTT", "SubJets"),
+    cut = cms.string(""), #we should not filter on cross linked collections
+    name = cms.string("genHTTV2Subjets"),
+    doc  = cms.string("gen HTTV2 candidates"),
+    singleton = cms.bool(False), # the number of entries is variable
+    extension = cms.bool(False), 
+    variables = cms.PSet(P4Vars  
     )
 )
 
@@ -984,10 +1102,13 @@ boostedSequence = cms.Sequence(
     #Softdrop bbtag + nsubjettiness
     ca15PFSoftdrop2JetsCHSNoSub+ca15PFSD2JetsCHSImpactParameterTagInfos+ca15PFSD2JetsCHSpfInclusiveSecondaryVertexFinderTagInfos+ \
     ca15PFSD2JetsCHSpfBoostedDoubleSVTagInfos+ca15PFSD2JetsCHSpfBoostedDoubleSecondaryVertexBJetTags+\
-    ca15PFSD2JetsCHSpatFatjet+ca15PFSD2JetsCHSFatjetOrdered+ca15PFSD2JetsCHSNSubjettiness+SD2FatjetsWithUserData+finalSD2Fatjets
-
+    ca15PFSD2JetsCHSpatFatjet+ca15PFSD2JetsCHSFatjetOrdered+ca15PFSD2JetsCHSNSubjettiness+SD2FatjetsWithUserData+\
+    finalSD2Fatjets 
 )
 boostedTables = cms.Sequence(HTTV2Table+HTTV2InfoTable+HTTV2SubjetsTable+ \
     ca15Table+FatjetBBTagTable+ca15SoftDropTable+SDFatjetBBTagTable+ca15SoftDropSubjetsTable+\
-    ca15SoftDrop2Table+SD2FatjetBBTagTable+ca15SoftDrop2SubjetsTable)
+    ca15SoftDrop2Table+SD2FatjetBBTagTable+ca15SoftDrop2SubjetsTable
+)
+
+boostedMC = cms.Sequence(selectedHadronsAndPartons + jetFlavourInfosHTTV2PFJets + HTTSubjetFlavourTable + genParticlesforHTT + genHTT + genHTTV2Table+genHTTV2SubjetTable)
 
