@@ -93,7 +93,7 @@ HTTSubjetFlavourTableProducer::produce(edm::Event& iEvent, const edm::EventSetup
 
     auto tab  = std::make_unique<nanoaod::FlatTable>(ncand, name_, false, true);
     tab->addColumn<int>("partonFlavour", partonFlavour, "flavour from parton matching", nanoaod::FlatTable::IntColumn);
-    tab->addColumn<uint8_t>("hadronFlavour", hadronFlavour, "flavour from hadron ghost clustering", nanoaod::FlatTable::UInt8Column);
+    tab->addColumn<int>("hadronFlavour", hadronFlavour, "flavour from hadron ghost clustering", nanoaod::FlatTable::IntColumn);
 
     iEvent.put(std::move(tab));
 }
