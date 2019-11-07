@@ -226,6 +226,7 @@ HTTV2SubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         rawFactor = Var("1.-jecFactor('Uncorrected')",float,doc="1 - Factor to get back to raw pT",precision=6),
         IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
         btagDeepB = Var("bDiscriminator('looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CSV V2 btag discriminator",precision=10),
+	nConstituents = Var("numberOfDaughters()",int,doc="Number of particles in the jet"),
         #area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
     )
 )
@@ -666,21 +667,21 @@ SDFatjetBBTagTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     )
 )
 
-ca15SoftDropSubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-    src = cms.InputTag("ca15PFSoftdropJetsCHSSubjetsOrdered"),
-    cut = cms.string(""), #we should not filter on cross linked collections
-    name = cms.string("FatjetCA15SoftDropSubjets"),
-    doc  = cms.string("Softdrop CA15 subjets (zcut = 0.1, beta = 0)"),
-    singleton = cms.bool(False), # the number of entries is variable
-    extension = cms.bool(False), 
-    variables = cms.PSet(P4Vars, 
-        rawFactor = Var("1.-jecFactor('Uncorrected')",float,doc="1 - Factor to get back to raw pT",precision=6),
-        #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
-        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
-        btag  = Var("bDiscriminator('ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CMVA V2 btag discriminator",precision=10),
-        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
-    )
-)
+#ca15SoftDropSubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+#    src = cms.InputTag("ca15PFSoftdropJetsCHSSubjetsOrdered"),
+#    cut = cms.string(""), #we should not filter on cross linked collections
+#    name = cms.string("FatjetCA15SoftDropSubjets"),
+#    doc  = cms.string("Softdrop CA15 subjets (zcut = 0.1, beta = 0)"),
+#    singleton = cms.bool(False), # the number of entries is variable
+#    extension = cms.bool(False), 
+#    variables = cms.PSet(P4Vars, 
+#        rawFactor = Var("1.-jecFactor('Uncorrected')",float,doc="1 - Factor to get back to raw pT",precision=6),
+#        #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
+#        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
+#        btag  = Var("bDiscriminator('ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CMVA V2 btag discriminator",precision=10),
+#        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
+#    )
+#)
 
 ######################################################
 ####    CA15 Softdrop Fatjets (beta=1, z=0.2)     ####
@@ -916,54 +917,54 @@ finalSD2Fatjets = cms.EDFilter("PATJetRefSelector",
 )
 
 #Make all tables
-ca15SoftDrop2Table = cms.EDProducer("SimpleCandidateFlatTableProducer",
-    src = cms.InputTag("ca15PFSoftdrop2JetsCHS"),
-    cut = cms.string(""), #we should not filter on cross linked collections
-    name = cms.string("FatjetCA15SoftDrop_b1z02"),
-    doc  = cms.string("Softdrop CA15 fatjets (zcut = 0.2, beta = 1)"),
-    singleton = cms.bool(False), # the number of entries is variable
-    extension = cms.bool(False), 
-    variables = cms.PSet(P4Vars, 
-        #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
-        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
-        subJetIdx1 = Var("?numberOfSourceCandidatePtrs()>0 && sourceCandidatePtr(0).numberOfSourceCandidatePtrs()>0?sourceCandidatePtr(0).key():-1", int,
-             doc="index of first subjet"),
-        subJetIdx2 = Var("?numberOfSourceCandidatePtrs()>1 && sourceCandidatePtr(1).numberOfSourceCandidatePtrs()>0?sourceCandidatePtr(1).key():-1", int,
-             doc="index of second subjet"),    
-    )
-)
+#ca15SoftDrop2Table = cms.EDProducer("SimpleCandidateFlatTableProducer",
+#    src = cms.InputTag("ca15PFSoftdrop2JetsCHS"),
+#    cut = cms.string(""), #we should not filter on cross linked collections
+#    name = cms.string("FatjetCA15SoftDrop_b1z02"),
+#    doc  = cms.string("Softdrop CA15 fatjets (zcut = 0.2, beta = 1)"),
+#    singleton = cms.bool(False), # the number of entries is variable
+#    extension = cms.bool(False), 
+#    variables = cms.PSet(P4Vars, 
+#        #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
+#        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
+#        subJetIdx1 = Var("?numberOfSourceCandidatePtrs()>0 && sourceCandidatePtr(0).numberOfSourceCandidatePtrs()>0?sourceCandidatePtr(0).key():-1", int,
+#             doc="index of first subjet"),
+#        subJetIdx2 = Var("?numberOfSourceCandidatePtrs()>1 && sourceCandidatePtr(1).numberOfSourceCandidatePtrs()>0?sourceCandidatePtr(1).key():-1", int,
+#             doc="index of second subjet"),    
+#    )
+#)
 
 #Add Nsubjettiness and BBtag
-SD2FatjetBBTagTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-    src = cms.InputTag("finalSD2Fatjets"),
-    cut = cms.string(""),
-    name = cms.string("FatjetCA15SoftDrop_b1z02"),
-    doc  = cms.string("Softdrop CA15 fatjets (zcut = 0.2, beta = 1)"),
-    singleton = cms.bool(False),
-    extension = cms.bool(True), 
-    variables = cms.PSet(
-        bbtag  = Var("bDiscriminator('ca15PFSD2JetsCHSpfBoostedDoubleSecondaryVertexBJetTags')",float,doc="Double btag discriminator",precision=10),
-        tau1  = Var("userFloat('tau1')",float,doc="N-subjettiness",precision=10),
-        tau2  = Var("userFloat('tau2')",float,doc="N-subjettiness",precision=10),
-        tau3  = Var("userFloat('tau3')",float,doc="N-subjettiness",precision=10),
-    )
-)
-
-ca15SoftDrop2SubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-    src = cms.InputTag("ca15PFSoftdrop2JetsCHSSubjetsOrdered"),
-    cut = cms.string(""), #we should not filter on cross linked collections
-    name = cms.string("FatjetCA15SoftDropSubjets_b1z02"),
-    doc  = cms.string("Softdrop CA15 subjets (zcut = 0.2, beta = 1)"),
-    singleton = cms.bool(False), # the number of entries is variable
-    extension = cms.bool(False), 
-    variables = cms.PSet(P4Vars, 
-        rawFactor = Var("1.-jecFactor('Uncorrected')",float,doc="1 - Factor to get back to raw pT",precision=6),
-        #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
-        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
-        btag  = Var("bDiscriminator('ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CMVA V2 btag discriminator",precision=10),
-        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
-    )
-)
+#SD2FatjetBBTagTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+#    src = cms.InputTag("finalSD2Fatjets"),
+#    cut = cms.string(""),
+#    name = cms.string("FatjetCA15SoftDrop_b1z02"),
+#    doc  = cms.string("Softdrop CA15 fatjets (zcut = 0.2, beta = 1)"),
+#    singleton = cms.bool(False),
+#    extension = cms.bool(True), 
+#    variables = cms.PSet(
+#        bbtag  = Var("bDiscriminator('ca15PFSD2JetsCHSpfBoostedDoubleSecondaryVertexBJetTags')",float,doc="Double btag discriminator",precision=10),
+#        tau1  = Var("userFloat('tau1')",float,doc="N-subjettiness",precision=10),
+#        tau2  = Var("userFloat('tau2')",float,doc="N-subjettiness",precision=10),
+#        tau3  = Var("userFloat('tau3')",float,doc="N-subjettiness",precision=10),
+#    )
+#)
+#
+#ca15SoftDrop2SubjetsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+#    src = cms.InputTag("ca15PFSoftdrop2JetsCHSSubjetsOrdered"),
+#    cut = cms.string(""), #we should not filter on cross linked collections
+#    name = cms.string("FatjetCA15SoftDropSubjets_b1z02"),
+#    doc  = cms.string("Softdrop CA15 subjets (zcut = 0.2, beta = 1)"),
+#    singleton = cms.bool(False), # the number of entries is variable
+#    extension = cms.bool(False), 
+#    variables = cms.PSet(P4Vars, 
+#        rawFactor = Var("1.-jecFactor('Uncorrected')",float,doc="1 - Factor to get back to raw pT",precision=6),
+#        #jetId = Var("userInt('tightId')*2+userInt('looseId')",int,doc="Jet ID flags bit1 is loose, bit2 is tight"),
+#        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
+#        btag  = Var("bDiscriminator('ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probb')+bDiscriminator('ca15PFSoftdrop2JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags:probbb')",float,doc="CMVA V2 btag discriminator",precision=10),
+#        IDPassed = Var("?pt() <= 20 || abs(eta()) >= 2.4 || neutralHadronEnergyFraction()>=0.90 || neutralEmEnergyFraction() >= 0.90 ||(chargedMultiplicity()+neutralMultiplicity()) <= 1 || chargedHadronEnergyFraction() <= 0 || chargedMultiplicity() <= 0?0:1",float, doc="Subjet ID passed?",precision=1),
+#    )
+#)
 
 #---- Gen HTT - Needed for JEC calculation
 
@@ -1109,8 +1110,8 @@ boostedSequence = cms.Sequence(
     finalSD2Fatjets 
 )
 boostedTables = cms.Sequence(HTTV2Table+HTTV2InfoTable+HTTV2SubjetsTable+ \
-    ca15Table+FatjetBBTagTable+ca15SoftDropTable+SDFatjetBBTagTable+ca15SoftDropSubjetsTable+\
-    ca15SoftDrop2Table+SD2FatjetBBTagTable+ca15SoftDrop2SubjetsTable
+    ca15Table+FatjetBBTagTable+ca15SoftDropTable+SDFatjetBBTagTable#+ca15SoftDropSubjetsTable#+\
+    #ca15SoftDrop2Table+SD2FatjetBBTagTable+ca15SoftDrop2SubjetsTable
 )
 
 boostedMC = cms.Sequence(selectedHadronsAndPartons + jetFlavourInfosHTTV2PFJets + HTTSubjetFlavourTable + genParticlesforHTT + genHTT + genHTTV2Table+genHTTV2SubjetTable)
