@@ -1,6 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 from  PhysicsTools.NanoAOD.common_cff import *
 
+from Configuration.Eras.Modifier_run2_nanoAOD_94XMiniAODv1_cff import run2_nanoAOD_94XMiniAODv1
+from Configuration.Eras.Modifier_run2_nanoAOD_94XMiniAODv2_cff import run2_nanoAOD_94XMiniAODv2
+
 
 
 ##################### User floats producers, selectors ##########################
@@ -14,10 +17,9 @@ tkMet = cms.EDProducer("PFMETProducer",
 )
 
 
-
 ##################### Tables for final output and docs ##########################
 metTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-    src = cms.InputTag("slimmedMETsModifiedMET"),
+    src = cms.InputTag("slimmedMETsFixEE2017"),
     name = cms.string("MET"),
     doc = cms.string("slimmedMET, type-1 corrected PF MET"),
     singleton = cms.bool(True),  # there's always exactly one MET per event
@@ -30,6 +32,8 @@ metTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
        significance = Var("metSignificance()", float, doc="MET significance",precision=10),
        MetUnclustEnUpDeltaX = Var("shiftedPx('UnclusteredEnUp')-px()", float, doc="Delta (METx_mod-METx) Unclustered Energy Up",precision=10),
        MetUnclustEnUpDeltaY = Var("shiftedPy('UnclusteredEnUp')-py()", float, doc="Delta (METy_mod-METy) Unclustered Energy Up",precision=10),
+       ptXY = Var("shiftedPt('NoShift','Type1XY')",float,doc="Type 1 + XY corrected pt", precision=10),
+       phiXY = Var("shiftedPhi('NoShift','Type1XY')",float,doc="Type 1 + XY corrected phi", precision=10),
 
     ),
 )
@@ -84,6 +88,11 @@ tkMetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     ),
 )
 
+metFixEE2017Table = metTable.clone()
+metFixEE2017Table.src = cms.InputTag("slimmedMETsFixEE2017")
+metFixEE2017Table.name = cms.string("METFixEE2017")
+metFixEE2017Table.doc = cms.string("Type-1 corrected PF MET, with fixEE2017 definition")
+
 
 metMCTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = metTable.src,
@@ -101,5 +110,9 @@ metMCTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 
 metSequence = cms.Sequence(chsForTkMet+tkMet)
 metTables = cms.Sequence( metTable + rawMetTable + caloMetTable + puppiMetTable + tkMetTable)
+_withFixEE2017_sequence = cms.Sequence(metTables.copy() + metFixEE2017Table)
+#metTables = cms.Sequence( metTable + rawMetTable + caloMetTable + puppiMetTable + tkMetTable)
+for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
+  modifier.toReplaceWith(metTables,_withFixEE2017_sequence) # only in old miniAOD, the new ones will come from the UL rereco
 metMC = cms.Sequence( metMCTable )
 

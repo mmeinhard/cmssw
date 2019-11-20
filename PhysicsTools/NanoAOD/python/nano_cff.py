@@ -127,7 +127,7 @@ nanoSequence = cms.Sequence(
         isoTrackSequence + # must be after all the leptons 
         linkedObjects  +
         jetTables + muonTables + tauTables + electronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + triggerObjectTables + isoTrackTables +
-	l1bits + boostedTables)
+  l1bits + boostedTables)
 
 nanoSequenceMC = cms.Sequence(genParticleSequence + particleLevelSequence + nanoSequence + jetMC + muonMC + electronMC + photonMC + tauMC + metMC + ttbarCatMCProducers +  globalTablesMC + btagWeightTable + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable + L1PrefiringTable + boostedTables + boostedMC)
 
@@ -156,8 +156,6 @@ def nanoAOD_addDeepBTagFor80X(process):
     process.additionalendpath = cms.EndPath(patAlgosToolsTask)
     return process
 
-
-
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 #from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
 def nanoAOD_recalibrateMETs(process,isData):
@@ -167,30 +165,16 @@ def nanoAOD_recalibrateMETs(process,isData):
         src = process.updatedJetsWithUserData.src,
         skipEM = False,
         type1JetPtThreshold = 0.0,
-        calcMuonSubtrRawPtAsValueMap = cms.bool(True),
+        #calcMuonSubtrRawPtAsValueMap = cms.bool(True),
     )
     process.jetSequence.insert(process.jetSequence.index(process.updatedJetsWithUserData),cms.Sequence(process.basicJetsForMetForT1METNano))
-    process.updatedJetsWithUserData.userFloats.muonSubtrRawPt = cms.InputTag("basicJetsForMetForT1METNano:MuonSubtrRawPt")
+    #process.updatedJetsWithUserData.userFloats.muonSubtrRawPt = cms.InputTag("basicJetsForMetForT1METNano:MuonSubtrRawPt")
     process.corrT1METJetTable.src = process.finalJets.src
     process.corrT1METJetTable.cut = "pt<15 && abs(eta)<9.9"
-    for table in process.jetTable, process.corrT1METJetTable:
-        table.variables.muonSubtrFactor = Var("1-userFloat('muonSubtrRawPt')/(pt()*jecFactor('Uncorrected'))",float,doc="1-(muon-subtracted raw pt)/(raw pt)",precision=6)
+    #for table in process.jetTable, process.corrT1METJetTable:
+    #    table.variables.muonSubtrFactor = Var("1-userFloat('muonSubtrRawPt')/(pt()*jecFactor('Uncorrected'))",float,doc="1-(muon-subtracted raw pt)/(raw pt)",precision=6)
     process.metTables += process.corrT1METJetTable
-#    makePuppiesFromMiniAOD(process,True) # call this before in the global customizer otherwise it would reset photon IDs in VID
-#    runMetCorAndUncFromMiniAOD(process,isData=isData,metType="Puppi",postfix="Puppi",jetFlavor="AK4PFPuppi")
-#    process.puppiNoLep.useExistingWeights = False
-#    process.puppi.useExistingWeights = False
-#    process.nanoSequenceCommon.insert(process.nanoSequenceCommon.index(jetSequence),cms.Sequence(process.puppiMETSequence+process.fullPatMetSequencePuppi))
     return process
-
-from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-def nanoAOD_runMETfixEE2017(process,isData):
-    runMetCorAndUncFromMiniAOD(process,
-        isData=isData,
-        fixEE2017 = True,
-        fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold': 3.139},
-        postfix = "ModifiedMET")
-    process.nanoSequence.insert(process.nanoSequence.index(jetSequence),process.fullPatMetSequenceFixEE2017)
 
 def nanoAOD_customizeCommon(process):
     run2_miniAOD_80XLegacy.toModify(process, nanoAOD_addDeepBTagFor80X)
@@ -199,35 +183,26 @@ def nanoAOD_customizeCommon(process):
 
 def nanoAOD_customizeData(process):
     process = nanoAOD_customizeCommon(process)
-    process = nanoAOD_nanoAOD_runMETfixEE2017(process,isData=True)
-    #for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
-    #    modifier.toModify(process, lambda p: nanoAOD_runMETfixEE2017(p,isData=True))
-    if hasattr(process,'calibratedPatElectrons80X'):
-        process.calibratedPatElectrons80X.isMC = cms.bool(False)
-        process.calibratedPatPhotons80X.isMC = cms.bool(False)
+    process = nanoAOD_recalibrateMETs(process,isData=True)
+    for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
+      modifier.toModify(process, lambda p: nanoAOD_runMETfixEE2017(p,isData=True))
     return process
 
 def nanoAOD_customizeMC(process):
     process = nanoAOD_customizeCommon(process)
-    process = nanoAOD_runMETfixEE2017(process,isData=False)
-    #for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
-    #    modifier.toModify(process, lambda p: nanoAOD_runMETfixEE2017(p,isData=False))
-    if hasattr(process,'calibratedPatElectrons80X'):
-        process.calibratedPatElectrons80X.isMC = cms.bool(True)
-        process.calibratedPatPhotons80X.isMC = cms.bool(True)
+    process = nanoAOD_recalibrateMETs(process,isData=False)
+    for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
+      modifier.toModify(process, lambda p: nanoAOD_runMETfixEE2017(p,isData=False))
     return process
 
-#from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-#def correctMET(process):
-#  print ("HEHRERE")
-#  runMetCorAndUncFromMiniAOD (
-#        process,
-#        isData = True, # false for MC
-#        fixEE2017 = True,
-#        fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold': 3.139} ,
-#        postfix = "ModifiedMET"
-#  )
-#  return process
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+def nanoAOD_runMETfixEE2017(process,isData):
+    runMetCorAndUncFromMiniAOD(process,isData=isData,
+                               fixEE2017 = True,
+                               fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold': 3.139},
+                               postfix = "FixEE2017")
+    process.nanoSequence.insert(process.nanoSequence.index(jetSequence),process.fullPatMetSequenceFixEE2017)
+
 
 ### Era dependent customization
 _80x_sequence = nanoSequence.copy()
@@ -240,5 +215,5 @@ _80x_sequence.insert(_80x_sequence.index(l1bits)+1, extraFlagsTable)
 
 run2_miniAOD_80XLegacy.toReplaceWith( nanoSequence, _80x_sequence)
 
-	
+  
 
