@@ -19,7 +19,7 @@ tkMet = cms.EDProducer("PFMETProducer",
 
 ##################### Tables for final output and docs ##########################
 metTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-    src = cms.InputTag("slimmedMETsFixEE2017"),
+    src = cms.InputTag("slimmedMETs"),
     name = cms.string("MET"),
     doc = cms.string("slimmedMET, type-1 corrected PF MET"),
     singleton = cms.bool(True),  # there's always exactly one MET per event
